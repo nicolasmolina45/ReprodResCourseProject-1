@@ -1,0 +1,140 @@
+Investigación reproducible: Tareas calificadas por los compañeros Course Project 1
+
+Cargar los datos 
+
+```{r}
+activity_data <- read.csv("./data/activity.csv")
+```
+
+preprocesar los datos
+
+```{r}
+names(activity_data)
+```
+
+```{r}
+head(activity_data)
+```
+
+```{r}
+summary(activity_data)
+```
+
+¿Cuál es la media del número total de pasos dados por día?
+
+1. Calcular el número total de pasos dados por día
+```{r}
+steps_day <- aggregate(steps ~ date, activity_data, sum, na.rm=TRUE)
+steps_day
+```
+
+2. histograma del número total de pasos dados cada día
+
+```{r}
+hist(steps_day$steps, main = "Total number of steps taken per day", xlab = "Total steps taken per day", col = "darkblue")
+```
+
+3. Calcule e informe la media y la mediana del número total de pasos dados por día
+
+```{r mean}
+mean_steps_day <- mean(steps_day$steps)
+mean_steps_day
+```
+
+```{r median}
+median_steps_day <- median(steps_day$steps)
+median_steps_day
+```
+
+¿Cuál es el patrón de actividad diaria promedio?
+
+1. Gráfica de serie de tiempo del intervalo de 5 minutos 
+
+```{r}
+steps_interval<-aggregate(steps~interval, data=activity_data, mean, na.rm=TRUE)
+plot(steps~interval, data=steps_interval, type="l", col="darkblue")
+```
+
+2. ¿Qué intervalo de 5 minutos, en promedio de todos los días del conjunto de datos, contiene la cantidad máxima de pasos?
+
+```{r}
+interval_Max_steps <- steps_interval[which.max(steps_interval$steps),]$interval
+interval_Max_steps
+```
+
+Imputación de valores faltantes
+
+1. Número total de valores faltantes en el conjunto de datos 
+
+```{r}
+values_missings <- sum(is.na(activity_data$steps))
+values_missings
+```
+
+2. Estrategia para completar todos los valores que faltan en el conjunto de datos. 
+
+```{r}
+mean_steps_interval<-function(interval){
+    steps_interval[steps_interval$interval==interval,]$steps
+}
+```
+
+3. Nuevo conjunto de datos igual al conjunto de datos original con los datos faltantes completados.
+
+```{r}
+activity_data_NA<-activity_data
+for(i in 1:nrow(activity_data_NA)){
+    if(is.na(activity_data_NA[i,]$steps)){
+        activity_data_NA[i,]$steps <- mean_steps_interval(activity_data_NA[i,]$interval)
+    }
+}
+```
+
+Histograma del número total de pasos dados por día, calculo de la  media  y  la mediana. 
+¿Estos valores difieren de las estimaciones de la primera parte de la tarea? 
+ ¿Cuál es el impacto de imputar los datos que faltan en las estimaciones del número total diario de pasos?
+
+```{r}
+steps_day_NA <- aggregate(steps ~ date, data=activity_data_NA, sum)
+hist(steps_day_NA $steps)
+mean_steps_day_NA <- mean(steps_day_NA$steps)
+median_steps_day_NA <- median(steps_day_NA$steps)
+```
+
+La media no cambió después de los reemplazos de NA, la mediana cambió en un porcentaje del 0,1%.
+
+¿Hay diferencias en los patrones de actividad entre los días de semana y los fines de semana?
+
+```{r}
+activity_data_NA$date <- as.Date(strptime(activity_data_NA$date, format="%Y-%m-%d"))
+activity_data_NA$day <- weekdays(activity_data_NA$date)
+for (i in 1:nrow(activity_data_NA)) {
+    if (activity_data_NA[i,]$day %in% c("Saturday","Sunday")) {
+        activity_data_NA[i,]$day<-"weekend"
+    }
+    else{
+        activity_data_NA[i,]$day<-"weekday"
+    }
+}
+steps_day <- aggregate(activity_data_NA$steps ~ activity_data_NA$interval + activity_data_NA$day, activity_data_NA, mean)
+```
+
+Gráfico de series de tiempo del intervalo de 5 minutos
+
+```{r}
+names(steps_day) <- c("interval", "day", "steps")
+library(lattice)
+xyplot(steps ~ interval | day, steps_day, type = "l", layout = c(1, 2), 
+    xlab = "Interval", ylab = "Number of steps")
+```
+
+
+
+
+
+
+
+
+
+
+
