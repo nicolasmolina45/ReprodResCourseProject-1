@@ -96,7 +96,7 @@ Histograma del número total de pasos dados por día, calculo de la  media  y  l
 
 ```{r}
 steps_day_NA <- aggregate(steps ~ date, data=activity_data_NA, sum)
-hist(steps_day_NA $steps)
+hist(steps_day_NA $steps, col = "darkblue", xlab = "Total steps per day", ylim = c(0,30), main = "Total number of steps taken each day")
 mean_steps_day_NA <- mean(steps_day_NA$steps)
 median_steps_day_NA <- median(steps_day_NA$steps)
 ```
@@ -127,14 +127,4 @@ library(lattice)
 xyplot(steps ~ interval | day, steps_day, type = "l", layout = c(1, 2), 
     xlab = "Interval", ylab = "Number of steps")
 ```
-
-
-
-
-
-
-
-
-
-
 
